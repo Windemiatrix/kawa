@@ -1,0 +1,8 @@
+// MASShortcut 2.4.0 targets macOS 10.10/10.11; Xcode 26 rejects deployment
+// targets below its supported floor. Carthage forwards this file to every
+// dependency build (XCODE_XCCONFIG_FILE) - pin deps to the app's own target.
+MACOSX_DEPLOYMENT_TARGET = 10.15
+
+// MASShortcut (ObjC) sets GCC_TREAT_WARNINGS_AS_ERRORS=YES; SDK 26 deprecation
+// warnings (Carbon-era APIs) would fail the build of an upstream we do not patch.
+GCC_TREAT_WARNINGS_AS_ERRORS = NO

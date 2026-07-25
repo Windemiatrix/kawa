@@ -20,20 +20,6 @@
                ReferencedContainer = "container:kawa.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "NO"
-            buildForArchiving = "NO"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "CC6D8ED91B654099005682C0"
-               BuildableName = "kawaTests.xctest"
-               BlueprintName = "kawaTests"
-               ReferencedContainer = "container:kawa.xcodeproj">
-            </BuildableReference>
-         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction
@@ -51,16 +37,6 @@
          </BuildableReference>
       </MacroExpansion>
       <Testables>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "CC6D8ED91B654099005682C0"
-               BuildableName = "kawaTests.xctest"
-               BlueprintName = "kawaTests"
-               ReferencedContainer = "container:kawa.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction
