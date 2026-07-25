@@ -1,0 +1,10 @@
+included:
+  - kawa
+excluded:
+  - Carthage
+  - build
+disabled_rules:
+  - todo
+  - identifier_name
+  - line_length
+  - force_cast

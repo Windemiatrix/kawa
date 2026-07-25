@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  XCODE_VERSION: "26.5"
+
+jobs:
+  build:
+    runs-on: macos-26
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s "/Applications/Xcode_${XCODE_VERSION}.app"
+
+      - name: Cache Carthage
+        uses: actions/cache@v4
+        with:
+          path: Carthage
+          key: carthage-${{ runner.os }}-xcode${{ env.XCODE_VERSION }}-${{ hashFiles('Cartfile.resolved') }}
+
+      - name: Bootstrap dependencies
+        run: make bootstrap
+
+      - name: Build (universal)
+        run: make build
+
+  swiftlint:
+    runs-on: ubuntu-latest
+    container: ghcr.io/realm/swiftlint:0.57.0
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: SwiftLint
+        run: swiftlint lint
+
+  shellcheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: ShellCheck
+        run: shellcheck scripts/*.sh

@@ -1,0 +1,105 @@
+name: Release
+
+# Version source of truth is kawa/Info.plist (CFBundleShortVersionString).
+# The tag v<version> is created by this workflow only - never locally.
+# Order: build first, tag and publish only after a successful build, so a
+# build failure needs no rollback; rollback covers only the narrow window
+# between tag creation and a failed publish. A published release is never
+# rolled back - a failed cask bump leaves the release in place and the lag
+# is visible in `make status`.
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+env:
+  XCODE_VERSION: "26.5"
+
+jobs:
+  release:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Select Xcode
+        run: sudo xcode-select -s "/Applications/Xcode_${XCODE_VERSION}.app"
+
+      - name: Read version from Info.plist
+        id: version
+        run: |
+          version="$(make print-version)"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          if git ls-remote --exit-code origin "refs/tags/v${version}" >/dev/null 2>&1; then
+            echo "FAIL: tag v${version} already exists - bump kawa/Info.plist first" >&2
+            exit 1
+          fi
+
+      - name: Extract release notes from CHANGELOG
+        run: |
+          mkdir -p build
+          scripts/changelog-extract.sh "${{ steps.version.outputs.version }}" > build/notes.md
+
+      - name: Cache Carthage
+        uses: actions/cache@v4
+        with:
+          path: Carthage
+          key: carthage-${{ runner.os }}-xcode${{ env.XCODE_VERSION }}-${{ hashFiles('Cartfile.resolved') }}
+
+      - name: Build distribution
+        run: make dist
+
+      - name: Create tag
+        id: tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "v${{ steps.version.outputs.version }}" -m "kawa v${{ steps.version.outputs.version }}"
+          git push origin "v${{ steps.version.outputs.version }}"
+
+      - name: Publish GitHub release
+        id: publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v${{ steps.version.outputs.version }}" \
+            build/Kawa.zip build/Kawa.zip.sha256 \
+            --title "v${{ steps.version.outputs.version }}" \
+            --notes-file build/notes.md
+
+      - name: Checkout Homebrew tap
+        uses: actions/checkout@v4
+        with:
+          repository: Windemiatrix/homebrew-tap
+          token: ${{ secrets.TAP_GITHUB_TOKEN }}
+          path: tap
+
+      - name: Update Homebrew cask
+        run: |
+          sha256="$(cat build/Kawa.zip.sha256)"
+          scripts/update-cask.sh "${{ steps.version.outputs.version }}" "${sha256}" tap
+          cd tap
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Casks/kawa.rb
+          if git diff --cached --quiet; then
+            echo "Cask already up to date - nothing to commit"
+          else
+            git commit -m "Cask update for kawa v${{ steps.version.outputs.version }}"
+            git push
+          fi
+
+      - name: Rollback tag on failed publish
+        if: failure() && steps.tag.outcome == 'success' && steps.publish.outcome != 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete "v${{ steps.version.outputs.version }}" -y || true
+          git push origin ":refs/tags/v${{ steps.version.outputs.version }}" || true
