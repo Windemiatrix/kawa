@@ -24,6 +24,9 @@ env:
 jobs:
   release:
     runs-on: macos-26
+    # TAP_GITHUB_TOKEN lives in this environment (protected branches only),
+    # not in repo secrets - a workflow pushed to a side branch cannot read it.
+    environment: release
     steps:
       - uses: actions/checkout@v7
         with:

@@ -20,12 +20,13 @@ released and adds its own release pipeline:
 
 ### Using [Homebrew](https://brew.sh/)
 
-`Kawa.app` is ad-hoc signed and not notarized, so Gatekeeper blocks a
-quarantined copy. Install without quarantine:
-
 ```shell
-brew install --cask --no-quarantine windemiatrix/tap/kawa
+brew install --cask windemiatrix/tap/kawa
 ```
+
+`Kawa.app` is ad-hoc signed and not notarized. The cask clears the Gatekeeper
+quarantine attribute on install, so the app launches normally. (Homebrew 5.0
+removed the `--no-quarantine` flag; the cask does this itself.)
 
 ### Manually
 
