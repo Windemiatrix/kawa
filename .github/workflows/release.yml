@@ -51,7 +51,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: Carthage
-          key: carthage-${{ runner.os }}-xcode${{ env.XCODE_VERSION }}-${{ hashFiles('Cartfile.resolved') }}
+          key: carthage-${{ runner.os }}-xcode${{ env.XCODE_VERSION }}-${{ hashFiles('Cartfile.resolved', 'carthage.xcconfig') }}
 
       - name: Build distribution
         run: make dist

@@ -16,7 +16,7 @@ help: ## Display this help.
 
 .PHONY: bootstrap
 bootstrap: ## fetch and build Carthage deps (universal: --no-use-binaries)
-	carthage bootstrap --platform macOS --no-use-binaries --cache-builds
+	XCODE_XCCONFIG_FILE="$(CURDIR)/carthage.xcconfig" carthage bootstrap --platform macOS --no-use-binaries --cache-builds
 
 .PHONY: build
 build: ## build the app (Release, universal arm64+x86_64)
