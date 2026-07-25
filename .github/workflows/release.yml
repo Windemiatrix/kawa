@@ -25,7 +25,7 @@ jobs:
   release:
     runs-on: macos-26
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -48,7 +48,7 @@ jobs:
           scripts/changelog-extract.sh "${{ steps.version.outputs.version }}" > build/notes.md
 
       - name: Cache Carthage
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: Carthage
           key: carthage-${{ runner.os }}-xcode${{ env.XCODE_VERSION }}-${{ hashFiles('Cartfile.resolved', 'carthage.xcconfig') }}
@@ -75,7 +75,7 @@ jobs:
             --notes-file build/notes.md
 
       - name: Checkout Homebrew tap
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: Windemiatrix/homebrew-tap
           token: ${{ secrets.TAP_GITHUB_TOKEN }}
