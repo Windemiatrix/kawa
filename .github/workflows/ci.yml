@@ -37,6 +37,10 @@ jobs:
       - name: Build (universal)
         run: make build
 
+      - name: Dump Carthage xcodebuild log on failure
+        if: failure()
+        run: tail -n 200 "${TMPDIR}"carthage-xcodebuild.*.log || true
+
   swiftlint:
     runs-on: ubuntu-latest
     container: ghcr.io/realm/swiftlint:0.57.0
