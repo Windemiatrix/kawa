@@ -1,3 +1,10 @@
+## 1.2.1 (25 Jul 2026)
+
+* Fix Homebrew install: the cask now clears the Gatekeeper quarantine
+  attribute in a postflight step (Homebrew 5.0 removed the `--no-quarantine`
+  flag).
+* Scope the release token to a protected GitHub Environment.
+
 ## 1.2.0 (25 Jul 2026)
 
 * First release of the Windemiatrix/kawa fork.
