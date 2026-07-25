@@ -17,6 +17,13 @@ cask "kawa" do
 
   app "Kawa.app"
 
+  # Kawa.app is ad-hoc signed, not notarized; Homebrew 5.0 removed the
+  # --no-quarantine flag, so strip the quarantine attribute here instead.
+  postflight do
+    system_command "/usr/bin/xattr",
+                   args: ["-dr", "com.apple.quarantine", "#{appdir}/Kawa.app"]
+  end
+
   uninstall quit: "net.noraesae.Kawa"
 
   zap trash: [
@@ -26,14 +33,12 @@ cask "kawa" do
 
   caveats do
     <<~EOS
-      Kawa.app is ad-hoc signed and NOT notarized. Gatekeeper will block the
-      first launch of a quarantined copy. Install without quarantine:
+      Kawa.app is ad-hoc signed and NOT notarized. The cask clears the
+      Gatekeeper quarantine attribute on install, so the app launches normally.
+      If macOS still blocks it (for example after a manual move), clear the
+      attribute yourself:
 
-        brew install --cask --no-quarantine windemiatrix/tap/kawa
-
-      Or clear the attribute after install:
-
-        xattr -cr /Applications/Kawa.app
+        xattr -dr com.apple.quarantine /Applications/Kawa.app
     EOS
   end
 end
